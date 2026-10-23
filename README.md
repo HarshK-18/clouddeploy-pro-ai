@@ -99,5 +99,60 @@ Manually verified:
 - Rejection of an unsupported action
 - Rejection of invalid application configuration
 
-Automated pytest coverage will be added on Day 3.
+
+## Local Development and Testing (Day 3)
+
+### Python environment
+
+Create a virtual environment:
+
+```powershell
+python -m venv .venv
+```
+
+Install development dependencies:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```
+
+### Automated tests
+
+Run pytest:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -v
+```
+
+Run Ruff:
+
+```powershell
+.\.venv\Scripts\ruff.exe check src tests
+```
+
+### Docker
+
+Build the application image:
+
+```powershell
+docker build -t clouddeploy-pro-ai:day3 .
+```
+
+Run the container:
+
+```powershell
+docker run --rm clouddeploy-pro-ai:day3
+```
+
+Verify the non-root user:
+
+```powershell
+docker run --rm clouddeploy-pro-ai:day3 whoami
+```
+
+Expected output: `appuser`.
+
+The container runs locally and does not deploy application resources
+to AWS.
+
 

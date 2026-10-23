@@ -1,0 +1,13 @@
+#Used this file so Ruff uses consistent settings locally and later in GitHub Actions.
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+#This configuration enables:
+#- E: common Python style errors.
+#- F: likely programming mistakes, such as undefined names.
+#- I: import sorting.

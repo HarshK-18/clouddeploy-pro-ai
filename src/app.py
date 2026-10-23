@@ -21,7 +21,7 @@ def json_response(status_code: int, payload: dict[str, Any]) -> dict[str, Any]:
         "body": json.dumps(payload),
     }
 
-#The entry point AWS Lambda will call. event contains the request; context provides Lambda execution metadata.
+# Lambda entry point: event holds the request; context holds runtime metadata.
 def handler(event: Any, context: Any) -> dict[str, Any]:
     """Handle a health/status request locally or through AWS Lambda."""
 #Input validation - Rejects non-dictionary requests and unsupported actions.
@@ -29,12 +29,13 @@ def handler(event: Any, context: Any) -> dict[str, Any]:
         logger.warning(
             json.dumps({"event": "request_rejected", "reason": "invalid_event"})
         )
-        return json_response(400, {
+        return json_response(400, { 
             "status": "error",
             "message": "Request must be a JSON object.",
         })
-
-    environment = os.getenv("APP_ENV", "development").strip().lower()     #Reads app env default to Dev
+    
+    #Read the environment name; default to development.
+    environment = os.getenv("APP_ENV", "development").strip().lower()     
 
     if environment not in ALLOWED_ENVIRONMENTS:
         logger.error(
@@ -68,7 +69,7 @@ def handler(event: Any, context: Any) -> dict[str, Any]:
             "environment": environment,
         })
     )
-#Structured Logging - Writes JSON-formatted events without logging the full request or secrets.
+## Log JSON events without exposing request data or secrets.
     return json_response(200, {
         "status": "healthy",
         "action": action,
