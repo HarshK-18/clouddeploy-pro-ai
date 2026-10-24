@@ -155,4 +155,23 @@ Expected output: `appuser`.
 The container runs locally and does not deploy application resources
 to AWS.
 
+## Day 5 — Validation and Security Gates
+
+Implemented automated validation checks in GitHub Actions to improve code quality and security.
+
+**Checks implemented:**
+- **Gitleaks:** Scans for potential exposed secrets.
+- **Ruff:** Checks Python code quality.
+- **pip-audit:** Scans application and development dependencies for known vulnerabilities.
+- **Configuration validation:** Validates `APP_ENV` values using `validation/check_config.py`.
+- **pytest:** Runs six unit tests.
+
+**Release Policy:**
+- All mandatory checks must pass before deployment.
+- Failed checks block subsequent steps in the same job.
+- `.gitignore` helps prevent accidental commits of sensitive files.
+- AI-assisted diagnostics cannot override security or validation failures.
+
+**Result:** Local linting, configuration validation, dependency audits, and all six tests passed. The GitHub Actions workflow was updated with the new validation and security checks.
+
 
