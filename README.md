@@ -174,4 +174,27 @@ Implemented automated validation checks in GitHub Actions to improve code qualit
 
 **Result:** Local linting, configuration validation, dependency audits, and all six tests passed. The GitHub Actions workflow was updated with the new validation and security checks.
 
+## Day 6 — AWS Setup and Security Review
+
+**Completed:**
+- Installed and verified AWS CLI v2.38.5.
+- Installed and verified AWS SAM CLI 1.170.0.
+- Verified AWS authentication using `aws sts get-caller-identity`.
+- Confirmed the configured AWS region: `ap-southeast-2` (Sydney).
+- Inspected IAM role policies, trust policy, and permissions boundary.
+- Prepared the planned AWS resource inventory for the project.
+
+**Security Findings:**
+- The active `AccountFullAccessRole` has the AWS-managed `AdministratorAccess` policy attached.
+- No inline role policies or permissions boundary were found during inspection.
+- A dedicated least-privilege deployment role will be planned before deploying project resources.
+- AWS Management Console will be preferred for IAM and other tasks that can be safely performed through the web interface.
+
+**Cost and Safety Policy:**
+- No project AWS resources were created during this review.
+- Review regional pricing and Free Tier eligibility before creating resources.
+- Avoid unnecessary EC2, NAT Gateway, EKS, and always-on infrastructure.
+- Document resource ownership, expected cost, and cleanup steps before deployment.
+
+**Next:** Design and review the least-privilege AWS deployment architecture.
 
