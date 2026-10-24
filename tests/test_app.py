@@ -32,7 +32,7 @@ def test_status_request_returns_200(monkeypatch):
 
     response = handler({"action": "status"}, None)
 
-    assert response["statusCode"] == 200
+    assert response["statusCode"] == 201
     assert response_body(response)["action"] == "status"
     assert response_body(response)["environment"] == "test"
 
