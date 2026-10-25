@@ -45,3 +45,27 @@ jobs:                             #Defines work that GitHub runs
 
       - name: Run pytest
         run: python -m pytest -v
+        
+
+  aws_oidc_verify:
+    name: Verify AWS OIDC authentication
+    runs-on: ubuntu-latest
+    needs: validate
+
+    # Only authenticate on a push to the protected target branch.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::272310879145:role/CloudDeployProAIGitHubActionsRole
+          aws-region: ap-southeast-2
+          role-session-name: CloudDeployProAIOIDCVerify
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
