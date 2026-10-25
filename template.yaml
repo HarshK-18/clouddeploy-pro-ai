@@ -1,0 +1,55 @@
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CloudDeploy Pro AI - minimal Lambda deployment foundation
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CloudDeployProAILambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogsForCloudDeployProAI
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/CloudDeployProAIHandler:log-stream:*
+
+  CloudDeployProAILogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/CloudDeployProAIHandler
+      RetentionInDays: 7
+
+  CloudDeployProAIHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CloudDeployProAIHandler
+      CodeUri: .
+      Handler: src.app.handler
+      Runtime: python3.14
+      MemorySize: 128
+      Timeout: 3
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          APP_ENV: development
+
+Outputs:
+  LambdaFunctionName:
+    Description: Deployed Lambda function name
+    Value: !Ref CloudDeployProAIHandler
+  LambdaLogGroupName:
+    Description: CloudWatch log group with seven-day retention
+    Value: !Ref CloudDeployProAILogGroup

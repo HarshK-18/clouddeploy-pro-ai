@@ -212,3 +212,21 @@ Implemented automated validation checks in GitHub Actions to improve code qualit
 
 **Next:** Prepare the AWS SAM deployment foundation and least-privilege deployment permissions.
 
+## Day 8 — AWS SAM Deployment Foundation
+
+**Completed:**
+- Created `template.yaml` using AWS SAM and AWS CloudFormation.
+- Defined the Lambda function `CloudDeployProAIHandler`.
+- Configured the Python handler as `src.app.handler`.
+- Defined a dedicated Lambda execution role with CloudWatch Logs permissions.
+- Configured a CloudWatch log group with seven-day retention.
+- Set the application environment variable `APP_ENV=development`.
+- Validated the SAM template using `sam validate --lint`.
+- Built the application using `sam build`.
+- Confirmed all six automated tests pass.
+
+**Validation results:** SAM validation successful, SAM build successful, and 6/6 tests passed.
+
+**Security and cost:** No AWS deployment performed during this step. Deployment and AWS resource costs have not yet been incurred by these local validation commands.
+
+**Next:** Review deployment permissions, validate the deployment plan, and assess AWS costs before creating resources.
