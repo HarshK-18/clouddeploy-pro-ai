@@ -198,3 +198,17 @@ Implemented automated validation checks in GitHub Actions to improve code qualit
 
 **Next:** Design and review the least-privilege AWS deployment architecture.
 
+## Day 7 — GitHub Actions OIDC Integration
+
+**Completed:**
+- Created the GitHub OIDC identity provider in AWS IAM.
+- Created `CloudDeployProAIGitHubActionsRole`.
+- Restricted role assumption to the repository's `main` branch using GitHub's immutable subject claim.
+- Configured GitHub Actions to obtain temporary AWS credentials through OIDC.
+- Verified AWS identity with `sts:GetCallerIdentity`.
+- Confirmed both CI validation and OIDC authentication jobs pass.
+
+**Security:** No permanent AWS access keys stored in GitHub. The IAM role currently has only identity-verification permissions.
+
+**Next:** Prepare the AWS SAM deployment foundation and least-privilege deployment permissions.
+
