@@ -6,7 +6,7 @@ on:                               #Events that trigger the workflow.
     branches: [main]
   pull_request:                   #Runs when pull request targets main
     branches: [main]
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -69,3 +69,46 @@ jobs:                             #Defines work that GitHub runs
 
       - name: Verify AWS identity
         run: aws sts get-caller-identity
+
+  deploy:
+    name: Deploy CloudDeploy Pro AI
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs:
+      - validate
+      - aws_oidc_verify
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::272310879145:role/CloudDeployProAIGitHubActionsRole
+          aws-region: ap-southeast-2
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Set up AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          version: 1.170.0
+
+      - name: Build SAM application
+        run: sam build
+
+      - name: Deploy SAM application
+        run: |
+          sam deploy \
+            --stack-name CloudDeployProAI \
+            --region ap-southeast-2 \
+            --s3-bucket clouddeploy-pro-ai-artifacts-272310879145-ap-southeast-2 \
+            --role-arn arn:aws:iam::272310879145:role/CloudDeployProAICloudFormationRole \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
