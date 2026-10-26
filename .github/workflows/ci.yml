@@ -1,63 +1,68 @@
 
-name: CloudDeploy Pro AI CI       #Name displayed in the GitHub Actions tab.
+name: CloudDeploy Pro AI CI       # Name displayed in the GitHub Actions tab.
 
-on:                               #Events that trigger the workflow.
-  push:                           #Code pushed to main
+on:                               # Events that trigger the workflow.
+  push:                           # Runs when code is pushed to main.
     branches: [main]
-  pull_request:                   #Runs when pull request targets main
+  pull_request:                   # Runs when a pull request targets main.
     branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
+  workflow_dispatch:              # Allows manual workflow execution from GitHub Actions.
 
-jobs:                             #Defines work that GitHub runs
+permissions:                      # Default permissions for all jobs.
+  contents: read                  # Allows jobs to read repository contents.
+
+jobs:                             # Defines work that GitHub runs.
+
   validate:
     name: Lint and test
-    runs-on: ubuntu-latest        #Uses a GitHub-hosted Linux runner.
+    runs-on: ubuntu-latest        # Uses a GitHub-hosted Linux runner.
 
-    steps:                        #Commands excecute in order
+    steps:                        # Commands execute in order.
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6 # Downloads the repository code.
 
       - name: Scan repository for secrets
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v2 # Checks the repository for exposed secrets.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v7.1.0
+        uses: actions/setup-python@v6 # Installs Python on the runner.
         with:
           python-version: "3.14"
 
       - name: Install development dependencies
         run: python -m pip install -r requirements-dev.txt
+
       - name: Run Ruff
-        run: ruff check src tests
+        run: ruff check src tests # Checks Python code quality and lint errors.
 
       - name: Audit application dependencies
-        run: pip-audit -r requirements.txt
+        run: pip-audit -r requirements.txt # Checks application dependencies for known vulnerabilities.
 
       - name: Audit development dependencies
-        run: pip-audit -r requirements-dev.txt
+        run: pip-audit -r requirements-dev.txt # Checks development dependencies for known vulnerabilities.
 
       - name: Validate configuration
-        run: python validation/check_config.py
+        run: python validation/check_config.py # Validates project configuration.
 
       - name: Run pytest
-        run: python -m pytest -v
-        
+        run: python -m pytest -v # Runs unit tests and displays detailed results.
 
   aws_oidc_verify:
     name: Verify AWS OIDC authentication
     runs-on: ubuntu-latest
-    needs: validate
+    needs: validate             # Runs only after validation succeeds.
 
-    # Only authenticate on a push to the protected target branch.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Verify AWS authentication on pushes to main and manual runs on main.
+    # Skip OIDC verification for pull requests and other branches.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
 
     permissions:
       contents: read
-      id-token: write
+      id-token: write            # Allows GitHub Actions to request an OIDC token.
 
     steps:
       - name: Configure AWS credentials using OIDC
@@ -68,40 +73,44 @@ jobs:                             #Defines work that GitHub runs
           role-session-name: CloudDeployProAIOIDCVerify
 
       - name: Verify AWS identity
-        run: aws sts get-caller-identity
+        run: aws sts get-caller-identity # Confirms the assumed AWS identity.
 
   deploy:
     name: Deploy CloudDeploy Pro AI
+    runs-on: ubuntu-latest
+
+    # Deploy only when manually triggered on main.
+    # Wait for validation and successful AWS OIDC verification.
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs:
       - validate
       - aws_oidc_verify
-    runs-on: ubuntu-latest
 
     permissions:
-      id-token: write
       contents: read
+      id-token: write            # Allows this job to authenticate to AWS using OIDC.
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v6 # Downloads the source code for deployment.
 
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::272310879145:role/CloudDeployProAIGitHubActionsRole
           aws-region: ap-southeast-2
+          role-session-name: CloudDeployProAIDeploy
 
       - name: Verify AWS identity
-        run: aws sts get-caller-identity
+        run: aws sts get-caller-identity # Confirms AWS authentication before deployment.
 
       - name: Set up AWS SAM CLI
         uses: aws-actions/setup-sam@v2
         with:
-          version: 1.170.0
+          version: 1.170.0       # Uses the SAM CLI version installed locally.
 
       - name: Build SAM application
-        run: sam build
+        run: sam build           # Prepares the Lambda application for deployment.
 
       - name: Deploy SAM application
         run: |
