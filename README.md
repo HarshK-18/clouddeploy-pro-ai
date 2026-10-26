@@ -230,3 +230,26 @@ Implemented automated validation checks in GitHub Actions to improve code qualit
 **Security and cost:** No AWS deployment performed during this step. Deployment and AWS resource costs have not yet been incurred by these local validation commands.
 
 **Next:** Review deployment permissions, validate the deployment plan, and assess AWS costs before creating resources.
+
+## Day 9 - AWS Deployment by Github using OIDC SAM , CloufFormation , Lambda
+
+Configured GitHub Actions CI with Ruff, pytest, dependency audits, configuration validation, and Gitleaks.
+Configured passwordless AWS authentication using GitHub OIDC.
+Created a dedicated CloudFormation execution role and Lambda execution role.
+Configured a private S3 bucket for SAM deployment artifacts.
+Deployed the application through AWS SAM and CloudFormation.
+Restricted deployment to manually triggered workflows on main.
+
+## Day 10 — Amazon SNS Email Notifications
+
+Objective: Configure email notifications using Amazon Simple Notification Service (SNS).
+
+Created the Standard SNS topic CloudDeployProAI-Notifications in ap-southeast-2.
+
+Created and confirmed an email subscription.
+
+Published a test notification and verified email delivery.
+
+Established the notification foundation for future CI/CD alerts.
+
+Key concepts: SNS topics, email subscriptions, subscription confirmation, message publishing, and notification delivery.
