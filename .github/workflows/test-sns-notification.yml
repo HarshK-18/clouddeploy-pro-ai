@@ -1,4 +1,6 @@
-
+# TEMPORARY TEST / REFERENCE WORKFLOW
+# Intentionally fails one job to test SNS email notifications.
+# Run manually only; do not use for production deployments.
 name: Temporary SNS Failure Alert Test
 
 on:

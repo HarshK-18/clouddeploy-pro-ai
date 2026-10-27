@@ -22,7 +22,7 @@ jobs:                             # Defines work that GitHub runs.
         uses: actions/checkout@v6 # Downloads the repository code.
 
       - name: Scan repository for secrets
-        uses: gitleaks/gitleaks-action@v2 # Checks the repository for exposed secrets.
+        uses: gitleaks/gitleaks-action@v2 # Checks for exposed secrets.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -35,19 +35,19 @@ jobs:                             # Defines work that GitHub runs.
         run: python -m pip install -r requirements-dev.txt
 
       - name: Run Ruff
-        run: ruff check src tests # Checks Python code quality and lint errors.
+        run: ruff check src tests # Checks Python code quality.
 
       - name: Audit application dependencies
-        run: pip-audit -r requirements.txt # Checks application dependencies for known vulnerabilities.
+        run: pip-audit -r requirements.txt # Checks application vulnerabilities.
 
       - name: Audit development dependencies
-        run: pip-audit -r requirements-dev.txt # Checks development dependencies for known vulnerabilities.
+        run: pip-audit -r requirements-dev.txt # Checks development vulnerabilities.
 
       - name: Validate configuration
         run: python validation/check_config.py # Validates project configuration.
 
       - name: Run pytest
-        run: python -m pytest -v # Runs unit tests and displays detailed results.
+        run: python -m pytest -v # Runs unit tests.
 
   aws_oidc_verify:
     name: Verify AWS OIDC authentication
@@ -55,7 +55,7 @@ jobs:                             # Defines work that GitHub runs.
     needs: validate             # Runs only after validation succeeds.
 
     # Verify AWS authentication on pushes to main and manual runs on main.
-    # Skip OIDC verification for pull requests and other branches.
+    # Skip OIDC verification for pull requests.
     if: >-
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
@@ -80,7 +80,7 @@ jobs:                             # Defines work that GitHub runs.
     runs-on: ubuntu-latest
 
     # Deploy only when manually triggered on main.
-    # Wait for validation and successful AWS OIDC verification.
+    # Both validation and OIDC verification must succeed.
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs:
       - validate
@@ -88,12 +88,12 @@ jobs:                             # Defines work that GitHub runs.
 
     permissions:
       contents: read
-      id-token: write            # Allows this job to authenticate to AWS using OIDC.
+      id-token: write            # Allows this job to authenticate using OIDC.
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6 # Downloads the source code for deployment.
-      
+        uses: actions/checkout@v6 # Downloads source code.
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -107,15 +107,15 @@ jobs:                             # Defines work that GitHub runs.
           role-session-name: CloudDeployProAIDeploy
 
       - name: Verify AWS identity
-        run: aws sts get-caller-identity # Confirms AWS authentication before deployment.
+        run: aws sts get-caller-identity # Confirms AWS authentication.
 
       - name: Set up AWS SAM CLI
         uses: aws-actions/setup-sam@v2
         with:
-          version: 1.170.0       # Uses the SAM CLI version installed locally.
+          version: 1.170.0
 
       - name: Build SAM application
-        run: sam build           # Prepares the Lambda application for deployment.
+        run: sam build # Prepares the Lambda application.
 
       - name: Deploy SAM application
         run: |
@@ -126,14 +126,13 @@ jobs:                             # Defines work that GitHub runs.
             --role-arn arn:aws:iam::272310879145:role/CloudDeployProAICloudFormationRole \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
-    
-    
+
   notify_failure:
     name: Notify on CI/CD failure
     runs-on: ubuntu-latest
 
-    # Wait for all jobs to finish, including jobs that were skipped.
-    # Send an alert only if a job failed, and only on main.
+    # Always evaluate after dependencies finish.
+    # Send notifications only for failed jobs on main.
     if: >-
       always() &&
       contains(needs.*.result, 'failure') &&
@@ -146,7 +145,7 @@ jobs:                             # Defines work that GitHub runs.
 
     permissions:
       contents: read
-      id-token: write
+      id-token: write            # Allows the notification job to authenticate using OIDC.
 
     steps:
       - name: Configure AWS credentials using OIDC
@@ -193,4 +192,3 @@ jobs:                             # Defines work that GitHub runs.
             --message "${MESSAGE}"
 
           echo "Failure notification published to SNS."
-
