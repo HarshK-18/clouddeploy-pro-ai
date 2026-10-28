@@ -10,12 +10,23 @@ from ai.analyze_failure import (
 
 
 def test_known_aws_permission_error() -> None:
-    result = analyze_failure(
-        "AccessDenied when calling Lambda UpdateFunctionCode"
-    )
+    """Verify that a known AWS permission message is classified correctly."""
+    from unittest.mock import Mock, patch
+
+    mock_model = Mock()
+    mock_model.predict.return_value = ["aws_permission"]
+
+    with patch(
+        "ai.analyze_failure.joblib.load",
+        return_value=mock_model,
+    ):
+        result = analyze_failure(
+            "AccessDenied when calling Lambda UpdateFunctionCode"
+        )
 
     assert result["category"] == "aws_permission"
     assert "IAM" in result["advice"]
+
 
 
 def test_missing_model_returns_generic_fallback() -> None:
