@@ -1,1 +1,4 @@
 # Runtime dependencies will be added and pinned as the application is built.
+scikit-learn
+pandas
+joblib

@@ -1,0 +1,123 @@
+
+
+error_message,category
+"AssertionError: expected status 200 but received 500",test_failure
+"pytest failed because the response body did not match",test_failure
+"Unit test failed with an unexpected result",test_failure
+"Test assertion failed for Lambda health response",test_failure
+"Expected healthy status but received unhealthy",test_failure
+"Smoke test failed after deployment completed",test_failure
+"Integration test returned an unexpected HTTP status",test_failure
+"Test failed because the JSON response was missing status",test_failure
+"Regression test detected incorrect application output",test_failure
+"Validation test failed because the required field was absent",test_failure
+"pytest reports AssertionError for deployment status",test_failure
+"Unit test expected true but received false",test_failure
+"Health check test failed because the endpoint timed out",test_failure
+"Smoke test detected an invalid response body",test_failure
+"Test suite failed while validating configuration behavior",test_failure
+"Application test returned HTTP 403 instead of HTTP 200",test_failure
+"Mocked AWS response did not match expected test data",test_failure
+"Test failed because the function returned an empty result",test_failure
+"CI validation tests failed due to incorrect output",test_failure
+"Automated test detected an unexpected exception",test_failure
+"ModuleNotFoundError: No module named boto3",dependency_issue
+"ImportError: cannot import name requests",dependency_issue
+"Required Python package is missing",dependency_issue
+"pip install failed while installing application dependencies",dependency_issue
+"Python cannot find the sklearn module",dependency_issue
+"requirements.txt does not include a required package",dependency_issue
+"Dependency installation failed because the package version is unavailable",dependency_issue
+"ImportError occurred while loading the application library",dependency_issue
+"Package installation failed due to incompatible dependency versions",dependency_issue
+"ModuleNotFoundError: No module named pandas",dependency_issue
+"Python package could not be imported during startup",dependency_issue
+"pip reported a dependency resolution conflict",dependency_issue
+"Required library is missing from the runtime environment",dependency_issue
+"Application failed because a third party module was not installed",dependency_issue
+"CI job failed while installing requirements-dev.txt",dependency_issue
+"Cannot import the configured AWS SDK library",dependency_issue
+"Dependency audit found an incompatible package version",dependency_issue
+"Python interpreter could not locate the installed module",dependency_issue
+"Build failed because the required package was unavailable",dependency_issue
+"Missing dependency prevented the application from starting",dependency_issue
+"Missing required environment variable APP_ENV",config_issue
+"Invalid configuration value for deployment region",config_issue
+"Configuration file is missing a required field",config_issue
+"Application configuration contains an unsupported environment name",config_issue
+"Required AWS region setting is empty",config_issue
+"Invalid value provided for the log retention period",config_issue
+"Configuration validation failed because a key was missing",config_issue
+"Malformed JSON configuration file prevented startup",config_issue
+"Environment variable FUNCTION_TIMEOUT is not configured",config_issue
+"Application received an invalid configuration format",config_issue
+"Missing required setting for notification topic ARN",config_issue
+"Configuration contains an invalid deployment environment",config_issue
+"Config validation failed because the region value was blank",config_issue
+"Required parameter was not defined in the configuration",config_issue
+"Invalid boolean value found in application settings",config_issue
+"Configuration file contains a syntax error",config_issue
+"Application environment variable has an unexpected value",config_issue
+"Deployment configuration references an unknown stack name",config_issue
+"Missing configuration setting for model artifact path",config_issue
+"Invalid configuration prevented the smoke test from starting",config_issue
+"AccessDenied: not authorized to perform lambda UpdateFunctionCode",aws_permission
+"User is not authorized to call iam PassRole",aws_permission
+"Permission denied while accessing the AWS resource",aws_permission
+"AccessDeniedException occurred while invoking AWS Lambda",aws_permission
+"IAM role lacks permission to publish to the SNS topic",aws_permission
+"Not authorized to perform cloudformation CreateChangeSet",aws_permission
+"Lambda execution role cannot write to CloudWatch Logs",aws_permission
+"Access denied while attempting to read the S3 deployment artifact",aws_permission
+"GitHub Actions role is not authorized to assume the AWS role",aws_permission
+"iam:PassRole failed because the role is not permitted",aws_permission
+"AWS API returned UnauthorizedOperation for the requested action",aws_permission
+"Insufficient IAM permissions to create the Lambda function",aws_permission
+"CloudFormation cannot assume the configured execution role",aws_permission
+"AccessDeniedException when publishing a failure notification",aws_permission
+"Role policy does not allow the requested S3 operation",aws_permission
+"STS AssumeRoleWithWebIdentity returned AccessDenied",aws_permission
+"User is not authorized to perform logs CreateLogGroup",aws_permission
+"Deployment failed because the required IAM action is denied",aws_permission
+"AWS rejected the request because the caller lacks permissions",aws_permission
+"Permission error occurred while updating the Lambda configuration",aws_permission
+"CloudFormation stack deployment failed",deployment_error
+"Lambda function creation failed during stack deployment",deployment_error
+"Change set creation failed for the application stack",deployment_error
+"SAM deployment failed while updating the CloudFormation stack",deployment_error
+"CloudFormation rollback started after resource creation failed",deployment_error
+"Stack update failed because a resource could not be created",deployment_error
+"Deployment package upload failed during release",deployment_error
+"CloudFormation reported UPDATE_FAILED for the Lambda resource",deployment_error
+"Stack deployment failed while applying infrastructure changes",deployment_error
+"CloudFormation change set execution failed",deployment_error
+"SAM build completed but deployment failed",deployment_error
+"CloudFormation stack entered ROLLBACK_COMPLETE status",deployment_error
+"Lambda deployment failed while publishing a new version",deployment_error
+"Infrastructure deployment failed during resource provisioning",deployment_error
+"CloudFormation could not complete the requested stack update",deployment_error
+"Deployment failed because the artifact could not be uploaded",deployment_error
+"Stack creation stopped after a resource provisioning error",deployment_error
+"Release workflow failed during the SAM deploy command",deployment_error
+"CloudFormation resource update failed during deployment",deployment_error
+"AWS deployment did not complete successfully",deployment_error
+"TypeError: unsupported operand type",app_runtime
+"KeyError: missing key in application event",app_runtime
+"Runtime exception occurred while processing the request",app_runtime
+"Lambda function timed out while handling an event",app_runtime
+"AttributeError: object has no attribute status",app_runtime
+"ZeroDivisionError occurred during request processing",app_runtime
+"Application crashed because an unexpected value was received",app_runtime
+"IndexError occurred while processing the input list",app_runtime
+"Lambda runtime exited unexpectedly during invocation",app_runtime
+"Unhandled exception occurred in the application handler",app_runtime
+"JSON parsing failed while processing the incoming event",app_runtime
+"Application returned an internal server error during execution",app_runtime
+"Runtime error occurred while reading the request payload",app_runtime
+"Function failed because an object reference was None",app_runtime
+"Unexpected exception occurred in the health check handler",app_runtime
+"Application crashed while formatting the response body",app_runtime
+"Lambda invocation failed due to a runtime exception",app_runtime
+"KeyError occurred while reading the environment configuration",app_runtime
+"Application encountered an error while processing the AWS event",app_runtime
+"Runtime failure occurred after the handler started",app_runtime

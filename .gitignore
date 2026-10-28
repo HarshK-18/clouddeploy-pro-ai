@@ -48,3 +48,6 @@ coverage.xml
 
 # SAM build output
 .aws-sam/
+
+# Trained machine learning artifacts
+models/*.joblib
