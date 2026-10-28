@@ -31,11 +31,11 @@ jobs:                             # Defines work that GitHub runs.
         with:
           python-version: "3.14"
 
-      - name: Install  dependencies
+      - name: Install dependencies
         run: python -m pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Run Ruff
-        run: ruff check src tests # Checks Python code quality.
+        run: ruff check . # Checks Python code quality across the project.
 
       - name: Audit application dependencies
         run: pip-audit -r requirements.txt # Checks application vulnerabilities.
@@ -148,6 +148,92 @@ jobs:                             # Defines work that GitHub runs.
       id-token: write            # Allows the notification job to authenticate using OIDC.
 
     steps:
+      - name: Check out repository for failure analysis
+        uses: actions/checkout@v6 # Downloads code and the labelled dataset.
+
+      - name: Set up Python for failure analysis
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Generate advisory ML diagnosis
+        id: diagnosis
+        continue-on-error: true
+        env:
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+          OIDC_RESULT: ${{ needs.aws_oidc_verify.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+
+          category = "unknown"
+          advice = (
+              "Automated diagnosis is unavailable. "
+              "Review the workflow logs and troubleshoot manually."
+          )
+
+          try:
+              # Install application dependencies on this separate runner.
+              subprocess.run(
+                  [
+                      sys.executable,
+                      "-m",
+                      "pip",
+                      "install",
+                      "-r",
+                      "requirements.txt",
+                  ],
+                  check=True,
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              )
+
+              # The model artifact is git-ignored, so train it on this runner.
+              subprocess.run(
+                  [sys.executable, "src/failure_classifier.py"],
+                  check=True,
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              )
+
+              from ai.analyze_failure import analyze_failure
+
+              # Classify a bounded job-result summary, not raw workflow logs.
+              message = (
+                  f"Validation job: {os.getenv('VALIDATE_RESULT', 'unknown')}; "
+                  f"AWS OIDC job: {os.getenv('OIDC_RESULT', 'unknown')}; "
+                  f"Deployment job: {os.getenv('DEPLOY_RESULT', 'unknown')}"
+              )
+
+              result = analyze_failure(message)
+              category = result.get("category", "unknown")
+              advice = result.get(
+                  "advice",
+                  "Review the workflow logs and troubleshoot manually.",
+              )
+
+          except Exception:
+              # ML must never prevent the notification from being attempted.
+              category = "unknown"
+              advice = (
+                  "Automated diagnosis is unavailable. "
+                  "Review the workflow logs and troubleshoot manually."
+              )
+
+          # Use single-line outputs for GitHub Actions.
+          category = str(category).replace("\r", " ").replace("\n", " ")
+          advice = str(advice).replace("\r", " ").replace("\n", " ")
+
+          with open(
+              os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8"
+          ) as output:
+              output.write(f"category={category}\n")
+              output.write(f"advice={advice}\n")
+          PY
+
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -167,6 +253,8 @@ jobs:                             # Defines work that GitHub runs.
           VALIDATE_RESULT: ${{ needs.validate.result }}
           OIDC_RESULT: ${{ needs.aws_oidc_verify.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
+          ML_CATEGORY: ${{ steps.diagnosis.outputs.category || 'unknown' }}
+          ML_ADVICE: ${{ steps.diagnosis.outputs.advice || 'Automated diagnosis is unavailable. Review the workflow logs manually.' }}
         run: |
           MESSAGE=$(cat <<EOF
           CloudDeploy Pro AI CI/CD failure detected.
@@ -179,6 +267,9 @@ jobs:                             # Defines work that GitHub runs.
           Validation job: ${VALIDATE_RESULT}
           AWS OIDC job: ${OIDC_RESULT}
           Deployment job: ${DEPLOY_RESULT}
+
+          ML diagnosis category: ${ML_CATEGORY}
+          Suggested troubleshooting: ${ML_ADVICE}
 
           View workflow logs:
           https://github.com/${REPOSITORY}/actions/runs/${RUN_ID}
