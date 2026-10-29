@@ -20,6 +20,8 @@ jobs:                             # Defines work that GitHub runs.
     steps:                        # Commands execute in order.
       - name: Check out repository
         uses: actions/checkout@v6 # Downloads the repository code.
+        with:
+          fetch-depth: 0 # Fetches full Git history for Gitleaks scanning.
 
       - name: Scan repository for secrets
         uses: gitleaks/gitleaks-action@v2 # Checks for exposed secrets.
