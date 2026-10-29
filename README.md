@@ -354,3 +354,93 @@ The classifier provides **advisory failure categorization only**. It does not re
 
 ### Day 12 Outcome
 Implemented and tested an end-to-end machine-learning workflow for failure classification, including dataset preparation, model training, evaluation, serialization, prediction, and automated testing.
+
+## Day 13 — AI-Powered Failure Analysis and SNS Integration
+
+### Overview
+
+Integrated the machine-learning failure classifier developed on Day 12 with the existing GitHub Actions CI/CD failure-notification workflow.
+
+The system now generates an advisory failure category and predefined troubleshooting recommendation, which are included in AWS SNS email notifications.
+
+### Features Implemented
+
+- Created `ai/analyze_failure.py` to analyze CI/CD failure messages.
+- Loaded the trained ML classifier using `joblib`.
+- Implemented error-message sanitization and input validation.
+- Added troubleshooting recommendations for six failure categories.
+- Implemented fallback handling for missing models, invalid inputs, and prediction errors.
+- Updated `.github/workflows/ci.yml` to generate an ML diagnosis when a CI/CD job fails.
+- Configured the notification runner to install dependencies and regenerate the trained model from the labelled dataset.
+- Integrated the predicted failure category and troubleshooting advice into AWS SNS email notifications.
+- Preserved mandatory validation, security checks, AWS OIDC authentication, and deployment gates.
+
+### Failure Analysis Workflow
+
+1. A GitHub Actions CI/CD job fails on the `main` branch.
+2. The `notify_failure` job starts.
+3. The workflow prepares the ML classifier and analyzes the CI job-result summary.
+4. The analyzer returns a failure category and predefined troubleshooting advice.
+5. If ML analysis fails, the system uses an `unknown` category and generic advice.
+6. AWS SNS sends an email containing the workflow details, job statuses, diagnosis, troubleshooting recommendation, and workflow URL.
+
+### Technologies Used
+
+- Python
+- scikit-learn
+- TF-IDF and Multinomial Naive Bayes
+- joblib
+- GitHub Actions
+- AWS SNS
+- AWS IAM and GitHub OIDC
+- pytest
+- Ruff
+
+### Files Created or Updated
+
+| File | Purpose |
+|---|---|
+| `ai/analyze_failure.py` | Loads the classifier, validates input, predicts failure categories, and provides troubleshooting advice. |
+| `tests/test_analyze_failure.py` | Contains automated tests for analyzer behavior and fallback handling. |
+| `.github/workflows/ci.yml` | Integrates advisory ML diagnosis into the SNS failure-notification job. |
+
+### Testing and Validation
+
+- All **20 automated pytest tests passed**.
+- Ruff linting passed.
+- GitHub Actions validation and AWS OIDC verification succeeded.
+- Verified that a failed CI run triggered the SNS notification job.
+- Successfully received an SNS email containing the ML category and troubleshooting advice.
+- Verified that failed validation prevents dependent deployment steps from running.
+
+### Important Design Considerations
+
+- ML classification is advisory and does not override mandatory CI/CD validation or security controls.
+- The notification workflow does not retrieve or email raw failure logs.
+- The current classifier analyzes job-result summaries rather than detailed failure messages, so predictions may not accurately identify the root cause.
+- If the ML model is unavailable or analysis fails, the workflow uses a generic diagnosis and still attempts SNS notification.
+- SNS delivery remains dependent on successful AWS authentication and SNS permissions.
+
+### Day 13 Outcome
+
+Successfully integrated AI-assisted failure analysis into the GitHub Actions notification workflow, enabling automated failure categorization and troubleshooting recommendations in AWS SNS emails while preserving existing CI/CD safety controls.
+
+## Day 14 — End-to-End Testing, CI/CD Failure Gates & Security Validation
+
+### Objective
+Validate the existing CloudDeploy Pro AI workflow by testing successful deployments, CI/CD failure gates, configuration validation, automated tests, and security checks without intentionally disrupting the production `main` branch.
+
+### Work Completed
+
+| # | Task | File / Component | Purpose |
+|---|---|---|---|
+| 1 | Ran the complete Python test suite | `tests/`, `python -m pytest -v` | Verified application and classifier behavior. |
+| 2 | Checked Python code quality | `src/`, `ai/`, `tests/` using Ruff | Confirmed code follows linting rules. |
+| 3 | Validated configuration | `validation/check_config.py` | Verified that supported `APP_ENV` values are accepted and invalid values are rejected. |
+| 4 | Checked Docker availability | Docker CLI and engine | Confirmed the local Docker environment is available. |
+| 5 | Verified successful CI and deployment | `.github/workflows/ci.yml` | Confirmed validation, AWS OIDC authentication, and manual deployment succeeded on `main`. |
+| 6 | Tested the Ruff failure gate | `ai/analyze_failure.py` | Introduced a temporary lint error on a test branch and confirmed that the validation job failed and dependent deployment jobs were skipped. |
+| 7 | Investigated Gitleaks checkout failure | `.github/workflows/ci.yml` | Identified that Gitleaks could not resolve the pull request commit history and updated checkout to use `fetch-depth: 0`. |
+| 8 | Restored clean code and revalidated CI | `ai/analyze_failure.py`, `.github/workflows/ci.yml` | Removed the temporary lint error and confirmed a subsequent CI run succeeded. |
+
+
